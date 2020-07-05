@@ -11,9 +11,6 @@ var rootCmd = &cobra.Command{
 	Use:   "scaffold",
 	Short: "generate scaffold.",
 	Long:  `generate scaffold.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Hello scaffold")
-	},
 }
 
 func Execute() {
