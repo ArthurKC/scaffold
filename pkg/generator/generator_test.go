@@ -6,13 +6,13 @@ import (
 )
 
 type MockTemplateSource struct {
-	ParamsReturn []string
+	ParamsReturn []*Parameter
 	PathsReturn  []string
 	SourceCalled []string
 	SourceReturn map[string]string
 }
 
-func (m *MockTemplateSource) Params() []string {
+func (m *MockTemplateSource) Params() []*Parameter {
 	return m.ParamsReturn
 }
 
@@ -26,13 +26,13 @@ func (m *MockTemplateSource) Source(path string) string {
 }
 
 type MockInputPort struct {
-	AskCalled []string
+	AskCalled []Parameter
 	AskReturn map[string]string
 }
 
-func (m *MockInputPort) Ask(message string) string {
-	m.AskCalled = append(m.AskCalled, message)
-	return m.AskReturn[message]
+func (m *MockInputPort) Ask(p *Parameter) string {
+	m.AskCalled = append(m.AskCalled, *p)
+	return m.AskReturn[p.Name]
 }
 
 type outWriteArgs struct {
@@ -90,7 +90,7 @@ func TestGenerator_Generate(t *testing.T) {
 	}
 	type want struct {
 		tmplSourceCalled []string
-		inAskCalled      []string
+		inAskCalled      []Parameter
 		outWriteCalled   []outWriteArgs
 	}
 	tests := []struct {
@@ -102,13 +102,13 @@ func TestGenerator_Generate(t *testing.T) {
 			name: "empty template source",
 			fields: fields{
 				tmpl: &MockTemplateSource{
-					ParamsReturn: []string{},
+					ParamsReturn: []*Parameter{},
 					PathsReturn:  []string{},
 					SourceCalled: []string{},
 					SourceReturn: map[string]string{},
 				},
 				in: &MockInputPort{
-					AskCalled: []string{},
+					AskCalled: []Parameter{},
 					AskReturn: map[string]string{},
 				},
 				out: &MockOutputPort{
@@ -117,7 +117,7 @@ func TestGenerator_Generate(t *testing.T) {
 			},
 			want: want{
 				tmplSourceCalled: []string{},
-				inAskCalled:      []string{},
+				inAskCalled:      []Parameter{},
 				outWriteCalled:   []outWriteArgs{},
 			},
 		},
@@ -125,13 +125,13 @@ func TestGenerator_Generate(t *testing.T) {
 			name: "no parameter template",
 			fields: fields{
 				tmpl: &MockTemplateSource{
-					ParamsReturn: []string{},
+					ParamsReturn: []*Parameter{},
 					PathsReturn:  []string{"a/b/c.yaml.gotmpl"},
 					SourceCalled: []string{},
 					SourceReturn: map[string]string{"a/b/c.yaml.gotmpl": "some content"},
 				},
 				in: &MockInputPort{
-					AskCalled: []string{},
+					AskCalled: []Parameter{},
 					AskReturn: map[string]string{},
 				},
 				out: &MockOutputPort{
@@ -140,7 +140,7 @@ func TestGenerator_Generate(t *testing.T) {
 			},
 			want: want{
 				tmplSourceCalled: []string{"a/b/c.yaml.gotmpl"},
-				inAskCalled:      []string{},
+				inAskCalled:      []Parameter{},
 				outWriteCalled: []outWriteArgs{
 					{path: "a/b/c.yaml", content: "some content"},
 				},
@@ -150,13 +150,15 @@ func TestGenerator_Generate(t *testing.T) {
 			name: "single parameter content template",
 			fields: fields{
 				tmpl: &MockTemplateSource{
-					ParamsReturn: []string{"Name"},
+					ParamsReturn: []*Parameter{
+						{Name: "Name", Description: "Description"},
+					},
 					PathsReturn:  []string{"a/b/c.yaml.gotmpl"},
 					SourceCalled: []string{},
 					SourceReturn: map[string]string{"a/b/c.yaml.gotmpl": "user: {{.Name}}"},
 				},
 				in: &MockInputPort{
-					AskCalled: []string{},
+					AskCalled: []Parameter{},
 					AskReturn: map[string]string{
 						"Name": "testUser",
 					},
@@ -167,7 +169,7 @@ func TestGenerator_Generate(t *testing.T) {
 			},
 			want: want{
 				tmplSourceCalled: []string{"a/b/c.yaml.gotmpl"},
-				inAskCalled:      []string{"Name"},
+				inAskCalled:      []Parameter{{Name: "Name", Description: "Description"}},
 				outWriteCalled: []outWriteArgs{
 					{path: "a/b/c.yaml", content: "user: testUser"},
 				},
@@ -177,13 +179,15 @@ func TestGenerator_Generate(t *testing.T) {
 			name: "single parameter content and path template",
 			fields: fields{
 				tmpl: &MockTemplateSource{
-					ParamsReturn: []string{"Name"},
+					ParamsReturn: []*Parameter{
+						{Name: "Name", Description: "Description"},
+					},
 					PathsReturn:  []string{"a/b/{{.Name}}.yaml.gotmpl"},
 					SourceCalled: []string{},
 					SourceReturn: map[string]string{"a/b/{{.Name}}.yaml.gotmpl": "name: {{.Name}}"},
 				},
 				in: &MockInputPort{
-					AskCalled: []string{},
+					AskCalled: []Parameter{},
 					AskReturn: map[string]string{
 						"Name": "testUser",
 					},
@@ -194,7 +198,7 @@ func TestGenerator_Generate(t *testing.T) {
 			},
 			want: want{
 				tmplSourceCalled: []string{"a/b/{{.Name}}.yaml.gotmpl"},
-				inAskCalled:      []string{"Name"},
+				inAskCalled:      []Parameter{{Name: "Name", Description: "Description"}},
 				outWriteCalled: []outWriteArgs{
 					{path: "a/b/testUser.yaml", content: "name: testUser"},
 				},
@@ -204,13 +208,16 @@ func TestGenerator_Generate(t *testing.T) {
 			name: "multi parameters content and path template",
 			fields: fields{
 				tmpl: &MockTemplateSource{
-					ParamsReturn: []string{"Name", "Score"},
+					ParamsReturn: []*Parameter{
+						{Name: "Name", Description: "D1"},
+						{Name: "Score", Description: "D2"},
+					},
 					PathsReturn:  []string{"a/{{.Name}}/{{.Score}}.yaml.gotmpl"},
 					SourceCalled: []string{},
 					SourceReturn: map[string]string{"a/{{.Name}}/{{.Score}}.yaml.gotmpl": "{{.Name}}: {{.Score}}"},
 				},
 				in: &MockInputPort{
-					AskCalled: []string{},
+					AskCalled: []Parameter{},
 					AskReturn: map[string]string{
 						"Name":  "testUser",
 						"Score": "100",
@@ -222,7 +229,10 @@ func TestGenerator_Generate(t *testing.T) {
 			},
 			want: want{
 				tmplSourceCalled: []string{"a/{{.Name}}/{{.Score}}.yaml.gotmpl"},
-				inAskCalled:      []string{"Name", "Score"},
+				inAskCalled: []Parameter{
+					{Name: "Name", Description: "D1"},
+					{Name: "Score", Description: "D2"},
+				},
 				outWriteCalled: []outWriteArgs{
 					{path: "a/testUser/100.yaml", content: "testUser: 100"},
 				},
@@ -232,7 +242,10 @@ func TestGenerator_Generate(t *testing.T) {
 			name: "multi parameters content and multi paths template",
 			fields: fields{
 				tmpl: &MockTemplateSource{
-					ParamsReturn: []string{"Name", "Score"},
+					ParamsReturn: []*Parameter{
+						{Name: "Name", Description: "D1"},
+						{Name: "Score", Description: "D2"},
+					},
 					PathsReturn: []string{
 						"users/{{.Name}}.yaml.gotmpl",
 						"scores/{{.Score}}.yaml.gotmpl",
@@ -244,7 +257,7 @@ func TestGenerator_Generate(t *testing.T) {
 					},
 				},
 				in: &MockInputPort{
-					AskCalled: []string{},
+					AskCalled: []Parameter{},
 					AskReturn: map[string]string{
 						"Name":  "testUser",
 						"Score": "100",
@@ -259,7 +272,10 @@ func TestGenerator_Generate(t *testing.T) {
 					"users/{{.Name}}.yaml.gotmpl",
 					"scores/{{.Score}}.yaml.gotmpl",
 				},
-				inAskCalled: []string{"Name", "Score"},
+				inAskCalled: []Parameter{
+					{Name: "Name", Description: "D1"},
+					{Name: "Score", Description: "D2"},
+				},
 				outWriteCalled: []outWriteArgs{
 					{path: "users/testUser.yaml", content: "score: 100"},
 					{path: "scores/100.yaml", content: "name: testUser"},

@@ -9,15 +9,20 @@ import (
 )
 
 type InputPort interface {
-	Ask(message string) string
+	Ask(p *Parameter) string
 }
 
 type OutputPort interface {
 	Write(path string, content string)
 }
 
+type Parameter struct {
+	Name        string
+	Description string
+}
+
 type TemplateSource interface {
-	Params() []string
+	Params() []*Parameter
 	Paths() []string
 	Source(path string) string
 }
@@ -36,7 +41,7 @@ func (g *Generator) resolveParams() map[string]string {
 	paramNames := g.tmpl.Params()
 	params := make(map[string]string, len(paramNames))
 	for _, p := range paramNames {
-		params[p] = g.in.Ask(p)
+		params[p.Name] = g.in.Ask(p)
 	}
 	return params
 }

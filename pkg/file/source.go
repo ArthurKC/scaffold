@@ -6,11 +6,17 @@ import (
 	"path"
 	"path/filepath"
 
+	"github.com/ArthurKC/scaffold/pkg/generator"
 	"gopkg.in/yaml.v2"
 )
 
+type Parameter struct {
+	Name        string
+	Description string
+}
+
 type TemplateSourceMeta struct {
-	Params []string
+	Params []*Parameter
 }
 
 type TemplateSource struct {
@@ -59,8 +65,12 @@ func NewTemplateSource(templateDir string) (*TemplateSource, error) {
 	return &TemplateSource{&m, sources, templateDir}, nil
 }
 
-func (t *TemplateSource) Params() []string {
-	return t.meta.Params
+func (t *TemplateSource) Params() []*generator.Parameter {
+	ret := make([]*generator.Parameter, 0, len(t.meta.Params))
+	for _, p := range t.meta.Params {
+		ret = append(ret, &generator.Parameter{Name: p.Name, Description: p.Description})
+	}
+	return ret
 }
 
 func (t *TemplateSource) Paths() []string {
