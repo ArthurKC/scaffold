@@ -17,6 +17,7 @@ type InputPort interface {
 
 type OutputPort interface {
 	Write(path string, content string)
+	DestDir() string
 }
 
 type Parameter struct {
@@ -53,6 +54,7 @@ func (g *Generator) executeTemplate(name string, tmpl string, params map[string]
 	funcMap := make(template.FuncMap, 0)
 	funcMap["firstRuneToLower"] = xstrings.FirstRuneToLower
 	funcMap["firstRuneToUpper"] = xstrings.FirstRuneToUpper
+	funcMap["DestDir"] = g.out.DestDir
 	for k, v := range sprig.TxtFuncMap() {
 		funcMap[k] = v
 	}

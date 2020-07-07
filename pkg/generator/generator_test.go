@@ -41,11 +41,16 @@ type outWriteArgs struct {
 }
 
 type MockOutputPort struct {
-	WriteCalled []outWriteArgs
+	WriteCalled   []outWriteArgs
+	DestDirReturn string
 }
 
 func (m *MockOutputPort) Write(path string, content string) {
 	m.WriteCalled = append(m.WriteCalled, outWriteArgs{path, content})
+}
+
+func (m *MockOutputPort) DestDir() string {
+	return m.DestDirReturn
 }
 
 func TestNewGenerator(t *testing.T) {
@@ -294,7 +299,7 @@ func TestGenerator_Generate(t *testing.T) {
 					},
 					SourceCalled: []string{},
 					SourceReturn: map[string]string{
-						"users/{{snakecase .Name}}.yaml.gotmpl": "name: {{firstRuneToUpper .Name}}",
+						"users/{{snakecase .Name}}.yaml.gotmpl": "name: {{firstRuneToUpper .Name}}, dir: {{DestDir}}",
 					},
 				},
 				in: &MockInputPort{
@@ -304,7 +309,8 @@ func TestGenerator_Generate(t *testing.T) {
 					},
 				},
 				out: &MockOutputPort{
-					WriteCalled: []outWriteArgs{},
+					WriteCalled:   []outWriteArgs{},
+					DestDirReturn: "target/dir",
 				},
 			},
 			want: want{
@@ -315,7 +321,7 @@ func TestGenerator_Generate(t *testing.T) {
 					{Name: "Name", Description: "D1"},
 				},
 				outWriteCalled: []outWriteArgs{
-					{path: "users/test_user.yaml", content: "name: TestUser"},
+					{path: "users/test_user.yaml", content: "name: TestUser, dir: target/dir"},
 				},
 			},
 		},
