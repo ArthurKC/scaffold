@@ -1,0 +1,7 @@
+params:
+  - name: Project
+    description: "Full name identifing the project in the world. e.g. github.com/ArthurKC/scaffold"
+  - name: Name
+    description: "The aggregation root name. It must be lower camel case."
+  - name: Usecase 
+    description: "Use case of aggregation root. It must be lower camel case."

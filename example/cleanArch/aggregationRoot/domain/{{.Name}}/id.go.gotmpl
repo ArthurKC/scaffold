@@ -1,0 +1,8 @@
+package {{.Name}}
+
+type IDGenerator interface {
+	Generate() ID
+}
+
+// ID is id of {{.Name}}.
+type ID string
