@@ -6,6 +6,9 @@ import (
 	"path/filepath"
 	"strings"
 	"text/template"
+
+	"github.com/Masterminds/sprig"
+	"github.com/huandu/xstrings"
 )
 
 type InputPort interface {
@@ -47,7 +50,13 @@ func (g *Generator) resolveParams() map[string]string {
 }
 
 func (g *Generator) executeTemplate(name string, tmpl string, params map[string]string) string {
-	t, err := template.New(name).Parse(tmpl)
+	funcMap := make(template.FuncMap, 0)
+	funcMap["firstRuneToLower"] = xstrings.FirstRuneToLower
+	funcMap["firstRuneToUpper"] = xstrings.FirstRuneToUpper
+	for k, v := range sprig.TxtFuncMap() {
+		funcMap[k] = v
+	}
+	t, err := template.New(name).Funcs(funcMap).Parse(tmpl)
 	if err != nil {
 		log.Fatal("can not parse. %w", err)
 	}
