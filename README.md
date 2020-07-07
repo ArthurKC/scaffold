@@ -1,31 +1,19 @@
 # scaffold
-this creates scaffold with gotmpl. be simple and customizable.
 
-# usage
-interactive mode
-```
-> scaffold create cleanArch targetDir
+Simple and customizable scaffold generator with go template.
 
-> AggregateRootName?: user
-> MethodName?: create
+## usage
 
-created targetDir/domain/user.go
-created targetDir/usecase/user/create.go
-created targetDir/drivers/user.go
-created targetDir/adapters/user/repository.go
-...
-```
+### To create scaffold by interactive mode
 
-cui mode
-```
-> cat user_create.yaml
-AggregateRootName: user
-MethodName: create
-> scaffold create cleanArch targetDir < user_create.yaml
-
-created targetDir/domain/user.go
-created targetDir/usecase/user/create.go
-created targetDir/drivers/user.go
-created targetDir/adapters/user/repository.go
-...
+```bash
+> scaffold create example/cleanArch/aggregationRoot destDir
+Project: Full name identifing the project in the world. e.g. github.com/ArthurKC/scaffold
+Project?: github.com/ArthurKC/spiral
+Name: The aggregation root name. It must be lower camel case.
+Name?: user
+created destDir/adapters/user/on_memory_repository.go
+created destDir/domain/user/id.go
+created destDir/domain/user/repository.go
+created destDir/domain/user/user.go
 ```
