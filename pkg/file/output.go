@@ -32,3 +32,7 @@ func (o *Output) Write(path string, content string) {
 	}
 	fmt.Printf("created %s\n", destPath)
 }
+
+func (o *Output) DestDir() string {
+	return o.destDir
+}
