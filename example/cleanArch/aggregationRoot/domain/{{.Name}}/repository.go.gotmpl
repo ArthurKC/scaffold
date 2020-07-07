@@ -1,0 +1,6 @@
+package {{.Name}}
+
+type Repository interface {
+	Save({{substr 0 1 .Name}} *{{firstRuneToUpper .Name}}) error
+	FindByIdentity(id ID) (*{{firstRuneToUpper .Name}}, error)
+}
