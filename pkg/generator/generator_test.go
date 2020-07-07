@@ -282,6 +282,43 @@ func TestGenerator_Generate(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "template functions",
+			fields: fields{
+				tmpl: &MockTemplateSource{
+					ParamsReturn: []*Parameter{
+						{Name: "Name", Description: "D1"},
+					},
+					PathsReturn: []string{
+						"users/{{snakecase .Name}}.yaml.gotmpl",
+					},
+					SourceCalled: []string{},
+					SourceReturn: map[string]string{
+						"users/{{snakecase .Name}}.yaml.gotmpl": "name: {{firstRuneToUpper .Name}}",
+					},
+				},
+				in: &MockInputPort{
+					AskCalled: []Parameter{},
+					AskReturn: map[string]string{
+						"Name": "testUser",
+					},
+				},
+				out: &MockOutputPort{
+					WriteCalled: []outWriteArgs{},
+				},
+			},
+			want: want{
+				tmplSourceCalled: []string{
+					"users/{{snakecase .Name}}.yaml.gotmpl",
+				},
+				inAskCalled: []Parameter{
+					{Name: "Name", Description: "D1"},
+				},
+				outWriteCalled: []outWriteArgs{
+					{path: "users/test_user.yaml", content: "name: TestUser"},
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
