@@ -4,8 +4,14 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/ArthurKC/scaffold/cmd/template"
+
 	"github.com/spf13/cobra"
 )
+
+func init() {
+	template.BindCommand(rootCmd)
+}
 
 var rootCmd = &cobra.Command{
 	Use:   "scaffold",
