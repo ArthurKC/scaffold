@@ -6,6 +6,7 @@ Simple and customizable scaffold generator with go template.
 
 * easy
   * can generate templates from existed sources
+  * can use in any micro usecases quickly
   * need know "go template" only
   * can be contained in any projects
   * can customize the templates same as source
