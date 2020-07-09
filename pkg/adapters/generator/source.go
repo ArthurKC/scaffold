@@ -1,4 +1,4 @@
-package file
+package generator
 
 import (
 	"io/ioutil"
@@ -6,7 +6,7 @@ import (
 	"path"
 	"path/filepath"
 
-	"github.com/ArthurKC/scaffold/pkg/generator"
+	"github.com/ArthurKC/scaffold/pkg/domains/generator"
 	"gopkg.in/yaml.v2"
 )
 

@@ -1,11 +1,11 @@
-package cui
+package generator
 
 import (
 	"bufio"
 	"fmt"
 	"os"
 
-	"github.com/ArthurKC/scaffold/pkg/generator"
+	"github.com/ArthurKC/scaffold/pkg/domains/generator"
 )
 
 type Input struct {

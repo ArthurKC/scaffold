@@ -1,9 +1,8 @@
 package cmd
 
 import (
-	"github.com/ArthurKC/scaffold/pkg/cui"
-	"github.com/ArthurKC/scaffold/pkg/file"
-	"github.com/ArthurKC/scaffold/pkg/generator"
+	agenerator "github.com/ArthurKC/scaffold/pkg/adapters/generator"
+	"github.com/ArthurKC/scaffold/pkg/domains/generator"
 	"github.com/spf13/cobra"
 )
 
@@ -19,11 +18,11 @@ var createCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		templateDir := args[0]
 		destDir := args[1]
-		tSrc, err := file.NewTemplateSource(templateDir)
+		tSrc, err := agenerator.NewTemplateSource(templateDir)
 		if err != nil {
 			panic(err)
 		}
-		g := generator.New(tSrc, cui.NewInput(), file.NewOutput(destDir))
+		g := generator.New(tSrc, agenerator.NewInput(), agenerator.NewOutput(destDir))
 		g.Generate()
 	},
 }
