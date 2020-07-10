@@ -3,54 +3,13 @@ package generator
 import (
 	"reflect"
 	"testing"
+
+	"github.com/golang/mock/gomock"
 )
-
-type MockTemplateSource struct {
-	ParamsReturn []*Parameter
-	PathsReturn  []string
-	SourceCalled []string
-	SourceReturn map[string]string
-}
-
-func (m *MockTemplateSource) Params() []*Parameter {
-	return m.ParamsReturn
-}
-
-func (m *MockTemplateSource) Paths() []string {
-	return m.PathsReturn
-}
-
-func (m *MockTemplateSource) Source(path string) string {
-	m.SourceCalled = append(m.SourceCalled, path)
-	return m.SourceReturn[path]
-}
-
-type MockInputPort struct {
-	AskCalled []Parameter
-	AskReturn map[string]string
-}
-
-func (m *MockInputPort) Ask(p *Parameter) string {
-	m.AskCalled = append(m.AskCalled, *p)
-	return m.AskReturn[p.Name]
-}
 
 type outWriteArgs struct {
 	path    string
 	content string
-}
-
-type MockOutputPort struct {
-	WriteCalled   []outWriteArgs
-	DestDirReturn string
-}
-
-func (m *MockOutputPort) Write(path string, content string) {
-	m.WriteCalled = append(m.WriteCalled, outWriteArgs{path, content})
-}
-
-func (m *MockOutputPort) DestDir() string {
-	return m.DestDirReturn
 }
 
 func TestNewGenerator(t *testing.T) {
@@ -88,261 +47,120 @@ func TestNewGenerator(t *testing.T) {
 }
 
 func TestGenerator_Generate(t *testing.T) {
-	type fields struct {
-		tmpl TemplateSource
-		in   InputPort
-		out  OutputPort
-	}
-	type want struct {
-		tmplSourceCalled []string
-		inAskCalled      []Parameter
-		outWriteCalled   []outWriteArgs
-	}
 	tests := []struct {
-		name   string
-		fields fields
-		want   want
+		name    string
+		mockset func(tmpl *MockTemplateSource, in *MockInputPort, out *MockOutputPort)
 	}{
 		{
 			name: "empty template source",
-			fields: fields{
-				tmpl: &MockTemplateSource{
-					ParamsReturn: []*Parameter{},
-					PathsReturn:  []string{},
-					SourceCalled: []string{},
-					SourceReturn: map[string]string{},
-				},
-				in: &MockInputPort{
-					AskCalled: []Parameter{},
-					AskReturn: map[string]string{},
-				},
-				out: &MockOutputPort{
-					WriteCalled: []outWriteArgs{},
-				},
-			},
-			want: want{
-				tmplSourceCalled: []string{},
-				inAskCalled:      []Parameter{},
-				outWriteCalled:   []outWriteArgs{},
+			mockset: func(tmpl *MockTemplateSource, in *MockInputPort, out *MockOutputPort) {
+				tmpl.EXPECT().Params().Return([]*Parameter{})
+				tmpl.EXPECT().Paths().Return([]string{})
 			},
 		},
 		{
 			name: "no parameter template",
-			fields: fields{
-				tmpl: &MockTemplateSource{
-					ParamsReturn: []*Parameter{},
-					PathsReturn:  []string{"a/b/c.yaml.gotmpl"},
-					SourceCalled: []string{},
-					SourceReturn: map[string]string{"a/b/c.yaml.gotmpl": "some content"},
-				},
-				in: &MockInputPort{
-					AskCalled: []Parameter{},
-					AskReturn: map[string]string{},
-				},
-				out: &MockOutputPort{
-					WriteCalled: []outWriteArgs{},
-				},
-			},
-			want: want{
-				tmplSourceCalled: []string{"a/b/c.yaml.gotmpl"},
-				inAskCalled:      []Parameter{},
-				outWriteCalled: []outWriteArgs{
-					{path: "a/b/c.yaml", content: "some content"},
-				},
+			mockset: func(tmpl *MockTemplateSource, in *MockInputPort, out *MockOutputPort) {
+				tmpl.EXPECT().Params().Return([]*Parameter{})
+				tmpl.EXPECT().Paths().Return([]string{
+					"a/b/c.yaml.gotmpl",
+				})
+				tmpl.EXPECT().Source("a/b/c.yaml.gotmpl").Return("some content")
+				out.EXPECT().Write("a/b/c.yaml", "some content")
 			},
 		},
 		{
 			name: "single parameter content template",
-			fields: fields{
-				tmpl: &MockTemplateSource{
-					ParamsReturn: []*Parameter{
-						{Name: "Name", Description: "Description"},
-					},
-					PathsReturn:  []string{"a/b/c.yaml.gotmpl"},
-					SourceCalled: []string{},
-					SourceReturn: map[string]string{"a/b/c.yaml.gotmpl": "user: {{.Name}}"},
-				},
-				in: &MockInputPort{
-					AskCalled: []Parameter{},
-					AskReturn: map[string]string{
-						"Name": "testUser",
-					},
-				},
-				out: &MockOutputPort{
-					WriteCalled: []outWriteArgs{},
-				},
-			},
-			want: want{
-				tmplSourceCalled: []string{"a/b/c.yaml.gotmpl"},
-				inAskCalled:      []Parameter{{Name: "Name", Description: "Description"}},
-				outWriteCalled: []outWriteArgs{
-					{path: "a/b/c.yaml", content: "user: testUser"},
-				},
+			mockset: func(tmpl *MockTemplateSource, in *MockInputPort, out *MockOutputPort) {
+				tmpl.EXPECT().Params().Return([]*Parameter{
+					{Name: "Name", Description: "Description"},
+				})
+				tmpl.EXPECT().Paths().Return([]string{
+					"a/b/c.yaml.gotmpl",
+				})
+				tmpl.EXPECT().Source("a/b/c.yaml.gotmpl").Return("user: {{.Name}}")
+				in.EXPECT().Ask(&Parameter{Name: "Name", Description: "Description"}).Return("testUser")
+				out.EXPECT().Write("a/b/c.yaml", "user: testUser")
 			},
 		},
 		{
 			name: "single parameter content and path template",
-			fields: fields{
-				tmpl: &MockTemplateSource{
-					ParamsReturn: []*Parameter{
-						{Name: "Name", Description: "Description"},
-					},
-					PathsReturn:  []string{"a/b/{{.Name}}.yaml.gotmpl"},
-					SourceCalled: []string{},
-					SourceReturn: map[string]string{"a/b/{{.Name}}.yaml.gotmpl": "name: {{.Name}}"},
-				},
-				in: &MockInputPort{
-					AskCalled: []Parameter{},
-					AskReturn: map[string]string{
-						"Name": "testUser",
-					},
-				},
-				out: &MockOutputPort{
-					WriteCalled: []outWriteArgs{},
-				},
-			},
-			want: want{
-				tmplSourceCalled: []string{"a/b/{{.Name}}.yaml.gotmpl"},
-				inAskCalled:      []Parameter{{Name: "Name", Description: "Description"}},
-				outWriteCalled: []outWriteArgs{
-					{path: "a/b/testUser.yaml", content: "name: testUser"},
-				},
+			mockset: func(tmpl *MockTemplateSource, in *MockInputPort, out *MockOutputPort) {
+				tmpl.EXPECT().Params().Return([]*Parameter{
+					{Name: "Name", Description: "Description"},
+				})
+				tmpl.EXPECT().Paths().Return([]string{
+					"a/b/{{.Name}}.yaml.gotmpl",
+				})
+				tmpl.EXPECT().Source("a/b/{{.Name}}.yaml.gotmpl").Return("user: {{.Name}}")
+				in.EXPECT().Ask(&Parameter{Name: "Name", Description: "Description"}).Return("testUser")
+				out.EXPECT().Write("a/b/testUser.yaml", "user: testUser")
 			},
 		},
 		{
 			name: "multi parameters content and path template",
-			fields: fields{
-				tmpl: &MockTemplateSource{
-					ParamsReturn: []*Parameter{
-						{Name: "Name", Description: "D1"},
-						{Name: "Score", Description: "D2"},
-					},
-					PathsReturn:  []string{"a/{{.Name}}/{{.Score}}.yaml.gotmpl"},
-					SourceCalled: []string{},
-					SourceReturn: map[string]string{"a/{{.Name}}/{{.Score}}.yaml.gotmpl": "{{.Name}}: {{.Score}}"},
-				},
-				in: &MockInputPort{
-					AskCalled: []Parameter{},
-					AskReturn: map[string]string{
-						"Name":  "testUser",
-						"Score": "100",
-					},
-				},
-				out: &MockOutputPort{
-					WriteCalled: []outWriteArgs{},
-				},
-			},
-			want: want{
-				tmplSourceCalled: []string{"a/{{.Name}}/{{.Score}}.yaml.gotmpl"},
-				inAskCalled: []Parameter{
+			mockset: func(tmpl *MockTemplateSource, in *MockInputPort, out *MockOutputPort) {
+				tmpl.EXPECT().Params().Return([]*Parameter{
 					{Name: "Name", Description: "D1"},
 					{Name: "Score", Description: "D2"},
-				},
-				outWriteCalled: []outWriteArgs{
-					{path: "a/testUser/100.yaml", content: "testUser: 100"},
-				},
+				})
+				tmpl.EXPECT().Paths().Return([]string{
+					"a/{{.Name}}/{{.Score}}.yaml.gotmpl",
+				})
+				tmpl.EXPECT().Source("a/{{.Name}}/{{.Score}}.yaml.gotmpl").Return("{{.Name}}: {{.Score}}")
+				in.EXPECT().Ask(&Parameter{Name: "Name", Description: "D1"}).Return("testUser")
+				in.EXPECT().Ask(&Parameter{Name: "Score", Description: "D2"}).Return("100")
+				out.EXPECT().Write("a/testUser/100.yaml", "testUser: 100")
 			},
 		},
 		{
 			name: "multi parameters content and multi paths template",
-			fields: fields{
-				tmpl: &MockTemplateSource{
-					ParamsReturn: []*Parameter{
-						{Name: "Name", Description: "D1"},
-						{Name: "Score", Description: "D2"},
-					},
-					PathsReturn: []string{
-						"users/{{.Name}}.yaml.gotmpl",
-						"scores/{{.Score}}.yaml.gotmpl",
-					},
-					SourceCalled: []string{},
-					SourceReturn: map[string]string{
-						"users/{{.Name}}.yaml.gotmpl":   "score: {{.Score}}",
-						"scores/{{.Score}}.yaml.gotmpl": "name: {{.Name}}",
-					},
-				},
-				in: &MockInputPort{
-					AskCalled: []Parameter{},
-					AskReturn: map[string]string{
-						"Name":  "testUser",
-						"Score": "100",
-					},
-				},
-				out: &MockOutputPort{
-					WriteCalled: []outWriteArgs{},
-				},
-			},
-			want: want{
-				tmplSourceCalled: []string{
-					"users/{{.Name}}.yaml.gotmpl",
-					"scores/{{.Score}}.yaml.gotmpl",
-				},
-				inAskCalled: []Parameter{
+			mockset: func(tmpl *MockTemplateSource, in *MockInputPort, out *MockOutputPort) {
+				tmpl.EXPECT().Params().Return([]*Parameter{
 					{Name: "Name", Description: "D1"},
 					{Name: "Score", Description: "D2"},
-				},
-				outWriteCalled: []outWriteArgs{
-					{path: "users/testUser.yaml", content: "score: 100"},
-					{path: "scores/100.yaml", content: "name: testUser"},
-				},
+				})
+				tmpl.EXPECT().Paths().Return([]string{
+					"users/{{.Name}}.yaml.gotmpl",
+					"scores/{{.Score}}.yaml.gotmpl",
+				})
+				tmpl.EXPECT().Source("users/{{.Name}}.yaml.gotmpl").Return("score: {{.Score}}")
+				tmpl.EXPECT().Source("scores/{{.Score}}.yaml.gotmpl").Return("name: {{.Name}}")
+				in.EXPECT().Ask(&Parameter{Name: "Name", Description: "D1"}).Return("testUser")
+				in.EXPECT().Ask(&Parameter{Name: "Score", Description: "D2"}).Return("100")
+				out.EXPECT().Write("users/testUser.yaml", "score: 100")
+				out.EXPECT().Write("scores/100.yaml", "name: testUser")
 			},
 		},
 		{
 			name: "template functions",
-			fields: fields{
-				tmpl: &MockTemplateSource{
-					ParamsReturn: []*Parameter{
-						{Name: "Name", Description: "D1"},
-					},
-					PathsReturn: []string{
-						"users/{{snakecase .Name}}.yaml.gotmpl",
-					},
-					SourceCalled: []string{},
-					SourceReturn: map[string]string{
-						"users/{{snakecase .Name}}.yaml.gotmpl": "name: {{firstRuneToUpper .Name}}, dir: {{DestDir}}",
-					},
-				},
-				in: &MockInputPort{
-					AskCalled: []Parameter{},
-					AskReturn: map[string]string{
-						"Name": "testUser",
-					},
-				},
-				out: &MockOutputPort{
-					WriteCalled:   []outWriteArgs{},
-					DestDirReturn: "target/dir",
-				},
-			},
-			want: want{
-				tmplSourceCalled: []string{
-					"users/{{snakecase .Name}}.yaml.gotmpl",
-				},
-				inAskCalled: []Parameter{
+			mockset: func(tmpl *MockTemplateSource, in *MockInputPort, out *MockOutputPort) {
+				tmpl.EXPECT().Params().Return([]*Parameter{
 					{Name: "Name", Description: "D1"},
-				},
-				outWriteCalled: []outWriteArgs{
-					{path: "users/test_user.yaml", content: "name: TestUser, dir: target/dir"},
-				},
+				})
+				tmpl.EXPECT().Paths().Return([]string{
+					"users/{{snakecase .Name}}.yaml.gotmpl",
+				})
+				tmpl.EXPECT().Source("users/{{snakecase .Name}}.yaml.gotmpl").Return("name: {{firstRuneToUpper .Name}}, dir: {{DestDir}}")
+				in.EXPECT().Ask(&Parameter{Name: "Name", Description: "D1"}).Return("testUser")
+				out.EXPECT().Write("users/test_user.yaml", "name: TestUser, dir: target/dir")
+				out.EXPECT().DestDir().Return("target/dir")
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			tmpl := NewMockTemplateSource(ctrl)
+			in := NewMockInputPort(ctrl)
+			out := NewMockOutputPort(ctrl)
+			tt.mockset(tmpl, in, out)
 			g := &Generator{
-				tmpl: tt.fields.tmpl,
-				in:   tt.fields.in,
-				out:  tt.fields.out,
+				tmpl: tmpl,
+				in:   in,
+				out:  out,
 			}
 			g.Generate()
-			if got := g.tmpl.(*MockTemplateSource).SourceCalled; !reflect.DeepEqual(got, tt.want.tmplSourceCalled) {
-				t.Errorf("tmpl.Source() is called with args %v, want %v", got, tt.want.tmplSourceCalled)
-			}
-			if got := g.in.(*MockInputPort).AskCalled; !reflect.DeepEqual(got, tt.want.inAskCalled) {
-				t.Errorf("in.Ask() is called with args %v, want %v", got, tt.want.inAskCalled)
-			}
-			if got := g.out.(*MockOutputPort).WriteCalled; !reflect.DeepEqual(got, tt.want.outWriteCalled) {
-				t.Errorf("out.Write() is called with args %v, want %v", got, tt.want.outWriteCalled)
-			}
 		})
 	}
 }
