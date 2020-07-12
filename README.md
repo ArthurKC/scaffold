@@ -1,27 +1,24 @@
 # foundry
 
-Simple and customizable foundry metal with go mold.
+Simple and customizable scaffold generator as if molten metal pour into a mold in foundry.
 
 ## feature
 
 * easy
   * can generate molds from existed sources
   * can use in any micro usecases quickly
-  * need know "go mold" only
-  * can be contained in any projects
+  * need know "go template" only
   * can customize the molds same as source
   * can alias to minimize key stroke
 * simple
   * need only few meta files
-  * do only go mold
-
 
 ## usage
 
-### To create foundry by interactive mode
+### To create scaffold by interactive mode
 
 ```bash
-> foundry create example/cleanArch/aggregationRoot destDir
+> foundry metal pour_into molds/cleanArchitecture/aggregationRoot destDir
 Project: Full name identifing the project in the world. e.g. github.com/ArthurKC/foundry
 Project?: github.com/ArthurKC/spiral
 Name: The aggregation root name. It must be lower camel case.
