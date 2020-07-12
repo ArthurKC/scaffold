@@ -1,0 +1,19 @@
+package {{.Name}}
+
+import "fmt"
+
+// {{firstRuneToUpper .Name}} is aggregation root.
+type {{firstRuneToUpper .Name}} struct {
+	name    string 
+}
+
+// New creates new {{firstRuneToUpper .Name}} instance.
+func New(name string) *{{firstRuneToUpper .Name}} {
+	return &{{firstRuneToUpper .Name}}{
+		name: name,
+	}
+}
+
+func ({{substr 0 1 .Name}} *{{firstRuneToUpper .Name}}) Name() string {
+	return {{substr 0 1 .Name}}.id
+}
