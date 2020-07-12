@@ -1,0 +1,5 @@
+constituents:
+  - name: Project
+    description: "Full name identifing the project in the world. e.g. github.com/ArthurKC/foundry"
+  - name: Name
+    description: "The aggregation root name. It must be lower camel case."

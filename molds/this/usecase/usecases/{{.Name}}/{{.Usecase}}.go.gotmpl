@@ -1,0 +1,42 @@
+package {{.Name}}
+
+import (
+	"{{.Project}}/{{DestDir}}/domain/{{.Name}}"
+)
+
+type {{firstRuneToUpper .Usecase}}Interactor struct {
+	repo   {{.Name}}.Repository
+	output {{firstRuneToUpper .Usecase}}OutputPort
+}
+
+func New{{firstRuneToUpper .Usecase}}Interactor(repo {{.Name}}.Repository, presenter {{firstRuneToUpper .Usecase}}OutputPort) *{{firstRuneToUpper .Usecase}}Interactor {
+	return &{{firstRuneToUpper .Usecase}}Interactor{
+		repo,
+		presenter,
+	}
+}
+
+func (r *{{firstRuneToUpper .Usecase}}Interactor) Execute{{firstRuneToUpper .Usecase}}(req *{{firstRuneToUpper .Usecase}}Request) {
+}
+
+type {{firstRuneToUpper .Usecase}}InputPort interface {
+	Execute{{firstRuneToUpper .Usecase}}(req *{{firstRuneToUpper .Usecase}}Request)
+}
+
+type {{firstRuneToUpper .Usecase}}OutputPort interface {
+	Render{{firstRuneToUpper .Usecase}}Response(r *{{firstRuneToUpper .Usecase}}Response)
+	Render{{firstRuneToUpper .Usecase}}Error(e *{{firstRuneToUpper .Usecase}}Error)
+}
+
+type {{firstRuneToUpper .Usecase}}Request struct {
+	{{firstRuneToUpper .Name}}ID string
+}
+
+type {{firstRuneToUpper .Usecase}}Response struct {
+	{{firstRuneToUpper .Name}}ID string
+}
+
+type {{firstRuneToUpper .Usecase}}Error struct {
+	Req *{{firstRuneToUpper .Usecase}}Request
+	Err error
+}
