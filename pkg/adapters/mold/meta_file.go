@@ -1,4 +1,4 @@
-package template
+package mold
 
 import (
 	"io/ioutil"
@@ -13,10 +13,10 @@ type MetaFile struct {
 }
 
 type metaYaml struct {
-	Params []*parameter
+	Constituents []*constituent
 }
 
-type parameter struct {
+type constituent struct {
 	Name        string
 	Description string
 }
@@ -28,7 +28,7 @@ func NewMetaFile(dirPath string) *MetaFile {
 }
 
 func (m *MetaFile) filePath() string {
-	return path.Join(m.dirPath, "scaffold.yaml")
+	return path.Join(m.dirPath, "mold.yaml")
 }
 
 func (m *MetaFile) Load() error {
@@ -53,6 +53,6 @@ func (m *MetaFile) Save() error {
 }
 
 func (m *MetaFile) Initialize() error {
-	m.meta = &metaYaml{[]*parameter{}}
+	m.meta = &metaYaml{[]*constituent{}}
 	return m.Save()
 }

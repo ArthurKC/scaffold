@@ -1,4 +1,4 @@
-package template
+package mold
 
 import (
 	"github.com/spf13/cobra"
@@ -9,7 +9,7 @@ func BindCommand(parent *cobra.Command) {
 }
 
 var rootCmd = &cobra.Command{
-	Use:   "template",
-	Short: "Manage template.",
-	Long:  `Manage template.`,
+	Use:   "mold",
+	Short: "Manage mold.",
+	Long:  `Manage mold.`,
 }
