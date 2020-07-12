@@ -1,6 +1,6 @@
 # foundry
 
-Simple and customizable scaffold generator as if molten metal pour into a mold in foundry.
+Simple and customizable scaffold generator as if pouring molten metal into a mold in the foundry.
 
 ## feature
 

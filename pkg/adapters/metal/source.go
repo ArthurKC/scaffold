@@ -6,7 +6,7 @@ import (
 	"path"
 	"path/filepath"
 
-	"github.com/ArthurKC/foundry/pkg/domains/metal"
+	"github.com/ArthurKC/foundry/pkg/usecases/metal"
 	"gopkg.in/yaml.v2"
 )
 

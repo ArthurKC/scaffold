@@ -2,7 +2,7 @@ package metal
 
 import (
 	ametal "github.com/ArthurKC/foundry/pkg/adapters/metal"
-	"github.com/ArthurKC/foundry/pkg/domains/metal"
+	"github.com/ArthurKC/foundry/pkg/usecases/metal"
 	"github.com/spf13/cobra"
 )
 

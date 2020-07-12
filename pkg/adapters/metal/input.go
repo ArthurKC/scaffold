@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ArthurKC/foundry/pkg/domains/metal"
+	"github.com/ArthurKC/foundry/pkg/usecases/metal"
 )
 
 type Input struct {
