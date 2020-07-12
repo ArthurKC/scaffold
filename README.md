@@ -1,28 +1,28 @@
-# scaffold
+# foundry
 
-Simple and customizable scaffold generator with go template.
+Simple and customizable foundry metal with go mold.
 
 ## feature
 
 * easy
-  * can generate templates from existed sources
+  * can generate molds from existed sources
   * can use in any micro usecases quickly
-  * need know "go template" only
+  * need know "go mold" only
   * can be contained in any projects
-  * can customize the templates same as source
+  * can customize the molds same as source
   * can alias to minimize key stroke
 * simple
   * need only few meta files
-  * do only go template
+  * do only go mold
 
 
 ## usage
 
-### To create scaffold by interactive mode
+### To create foundry by interactive mode
 
 ```bash
-> scaffold create example/cleanArch/aggregationRoot destDir
-Project: Full name identifing the project in the world. e.g. github.com/ArthurKC/scaffold
+> foundry create example/cleanArch/aggregationRoot destDir
+Project: Full name identifing the project in the world. e.g. github.com/ArthurKC/foundry
 Project?: github.com/ArthurKC/spiral
 Name: The aggregation root name. It must be lower camel case.
 Name?: user

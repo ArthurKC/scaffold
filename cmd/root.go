@@ -4,19 +4,21 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ArthurKC/scaffold/cmd/template"
+	"github.com/ArthurKC/foundry/cmd/metal"
+	"github.com/ArthurKC/foundry/cmd/mold"
 
 	"github.com/spf13/cobra"
 )
 
 func init() {
-	template.BindCommand(rootCmd)
+	metal.BindCommand(rootCmd)
+	mold.BindCommand(rootCmd)
 }
 
 var rootCmd = &cobra.Command{
-	Use:   "scaffold",
-	Short: "generate scaffold.",
-	Long:  `generate scaffold.`,
+	Use:   "foundry",
+	Short: "generate foundry.",
+	Long:  `generate foundry.`,
 }
 
 func Execute() {

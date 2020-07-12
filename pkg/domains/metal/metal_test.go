@@ -1,4 +1,4 @@
-package generator
+package metal
 
 import (
 	"reflect"
@@ -12,26 +12,26 @@ type outWriteArgs struct {
 	content string
 }
 
-func TestNewGenerator(t *testing.T) {
+func TestNewMetal(t *testing.T) {
 	type args struct {
-		tmpl TemplateSource
+		tmpl MoldSource
 		in   InputPort
 		out  OutputPort
 	}
 	tests := []struct {
 		name string
 		args args
-		want *Generator
+		want *Metal
 	}{
 		{
 			name: "correct case",
 			args: args{
-				tmpl: &MockTemplateSource{},
+				tmpl: &MockMoldSource{},
 				in:   &MockInputPort{},
 				out:  &MockOutputPort{},
 			},
-			want: &Generator{
-				tmpl: &MockTemplateSource{},
+			want: &Metal{
+				tmpl: &MockMoldSource{},
 				in:   &MockInputPort{},
 				out:  &MockOutputPort{},
 			},
@@ -40,28 +40,28 @@ func TestNewGenerator(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := New(tt.args.tmpl, tt.args.in, tt.args.out); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("NewGenerator() = %v, want %v", got, tt.want)
+				t.Errorf("NewMetal() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func TestGenerator_Generate(t *testing.T) {
+func TestMetal_Generate(t *testing.T) {
 	tests := []struct {
 		name    string
-		mockset func(tmpl *MockTemplateSource, in *MockInputPort, out *MockOutputPort)
+		mockset func(tmpl *MockMoldSource, in *MockInputPort, out *MockOutputPort)
 	}{
 		{
-			name: "empty template source",
-			mockset: func(tmpl *MockTemplateSource, in *MockInputPort, out *MockOutputPort) {
-				tmpl.EXPECT().Params().Return([]*Parameter{})
+			name: "empty mold source",
+			mockset: func(tmpl *MockMoldSource, in *MockInputPort, out *MockOutputPort) {
+				tmpl.EXPECT().Constituents().Return([]*Constituent{})
 				tmpl.EXPECT().Paths().Return([]string{})
 			},
 		},
 		{
-			name: "no parameter template",
-			mockset: func(tmpl *MockTemplateSource, in *MockInputPort, out *MockOutputPort) {
-				tmpl.EXPECT().Params().Return([]*Parameter{})
+			name: "no constituent mold",
+			mockset: func(tmpl *MockMoldSource, in *MockInputPort, out *MockOutputPort) {
+				tmpl.EXPECT().Constituents().Return([]*Constituent{})
 				tmpl.EXPECT().Paths().Return([]string{
 					"a/b/c.yaml.gotmpl",
 				})
@@ -70,37 +70,37 @@ func TestGenerator_Generate(t *testing.T) {
 			},
 		},
 		{
-			name: "single parameter content template",
-			mockset: func(tmpl *MockTemplateSource, in *MockInputPort, out *MockOutputPort) {
-				tmpl.EXPECT().Params().Return([]*Parameter{
+			name: "single constituent content mold",
+			mockset: func(tmpl *MockMoldSource, in *MockInputPort, out *MockOutputPort) {
+				tmpl.EXPECT().Constituents().Return([]*Constituent{
 					{Name: "Name", Description: "Description"},
 				})
 				tmpl.EXPECT().Paths().Return([]string{
 					"a/b/c.yaml.gotmpl",
 				})
 				tmpl.EXPECT().Source("a/b/c.yaml.gotmpl").Return("user: {{.Name}}")
-				in.EXPECT().Ask(&Parameter{Name: "Name", Description: "Description"}).Return("testUser")
+				in.EXPECT().Ask(&Constituent{Name: "Name", Description: "Description"}).Return("testUser")
 				out.EXPECT().Write("a/b/c.yaml", "user: testUser")
 			},
 		},
 		{
-			name: "single parameter content and path template",
-			mockset: func(tmpl *MockTemplateSource, in *MockInputPort, out *MockOutputPort) {
-				tmpl.EXPECT().Params().Return([]*Parameter{
+			name: "single constituent content and path mold",
+			mockset: func(tmpl *MockMoldSource, in *MockInputPort, out *MockOutputPort) {
+				tmpl.EXPECT().Constituents().Return([]*Constituent{
 					{Name: "Name", Description: "Description"},
 				})
 				tmpl.EXPECT().Paths().Return([]string{
 					"a/b/{{.Name}}.yaml.gotmpl",
 				})
 				tmpl.EXPECT().Source("a/b/{{.Name}}.yaml.gotmpl").Return("user: {{.Name}}")
-				in.EXPECT().Ask(&Parameter{Name: "Name", Description: "Description"}).Return("testUser")
+				in.EXPECT().Ask(&Constituent{Name: "Name", Description: "Description"}).Return("testUser")
 				out.EXPECT().Write("a/b/testUser.yaml", "user: testUser")
 			},
 		},
 		{
-			name: "multi parameters content and path template",
-			mockset: func(tmpl *MockTemplateSource, in *MockInputPort, out *MockOutputPort) {
-				tmpl.EXPECT().Params().Return([]*Parameter{
+			name: "multi constituents content and path mold",
+			mockset: func(tmpl *MockMoldSource, in *MockInputPort, out *MockOutputPort) {
+				tmpl.EXPECT().Constituents().Return([]*Constituent{
 					{Name: "Name", Description: "D1"},
 					{Name: "Score", Description: "D2"},
 				})
@@ -108,15 +108,15 @@ func TestGenerator_Generate(t *testing.T) {
 					"a/{{.Name}}/{{.Score}}.yaml.gotmpl",
 				})
 				tmpl.EXPECT().Source("a/{{.Name}}/{{.Score}}.yaml.gotmpl").Return("{{.Name}}: {{.Score}}")
-				in.EXPECT().Ask(&Parameter{Name: "Name", Description: "D1"}).Return("testUser")
-				in.EXPECT().Ask(&Parameter{Name: "Score", Description: "D2"}).Return("100")
+				in.EXPECT().Ask(&Constituent{Name: "Name", Description: "D1"}).Return("testUser")
+				in.EXPECT().Ask(&Constituent{Name: "Score", Description: "D2"}).Return("100")
 				out.EXPECT().Write("a/testUser/100.yaml", "testUser: 100")
 			},
 		},
 		{
-			name: "multi parameters content and multi paths template",
-			mockset: func(tmpl *MockTemplateSource, in *MockInputPort, out *MockOutputPort) {
-				tmpl.EXPECT().Params().Return([]*Parameter{
+			name: "multi constituents content and multi paths mold",
+			mockset: func(tmpl *MockMoldSource, in *MockInputPort, out *MockOutputPort) {
+				tmpl.EXPECT().Constituents().Return([]*Constituent{
 					{Name: "Name", Description: "D1"},
 					{Name: "Score", Description: "D2"},
 				})
@@ -126,23 +126,23 @@ func TestGenerator_Generate(t *testing.T) {
 				})
 				tmpl.EXPECT().Source("users/{{.Name}}.yaml.gotmpl").Return("score: {{.Score}}")
 				tmpl.EXPECT().Source("scores/{{.Score}}.yaml.gotmpl").Return("name: {{.Name}}")
-				in.EXPECT().Ask(&Parameter{Name: "Name", Description: "D1"}).Return("testUser")
-				in.EXPECT().Ask(&Parameter{Name: "Score", Description: "D2"}).Return("100")
+				in.EXPECT().Ask(&Constituent{Name: "Name", Description: "D1"}).Return("testUser")
+				in.EXPECT().Ask(&Constituent{Name: "Score", Description: "D2"}).Return("100")
 				out.EXPECT().Write("users/testUser.yaml", "score: 100")
 				out.EXPECT().Write("scores/100.yaml", "name: testUser")
 			},
 		},
 		{
-			name: "template functions",
-			mockset: func(tmpl *MockTemplateSource, in *MockInputPort, out *MockOutputPort) {
-				tmpl.EXPECT().Params().Return([]*Parameter{
+			name: "mold functions",
+			mockset: func(tmpl *MockMoldSource, in *MockInputPort, out *MockOutputPort) {
+				tmpl.EXPECT().Constituents().Return([]*Constituent{
 					{Name: "Name", Description: "D1"},
 				})
 				tmpl.EXPECT().Paths().Return([]string{
 					"users/{{snakecase .Name}}.yaml.gotmpl",
 				})
 				tmpl.EXPECT().Source("users/{{snakecase .Name}}.yaml.gotmpl").Return("name: {{firstRuneToUpper .Name}}, dir: {{DestDir}}")
-				in.EXPECT().Ask(&Parameter{Name: "Name", Description: "D1"}).Return("testUser")
+				in.EXPECT().Ask(&Constituent{Name: "Name", Description: "D1"}).Return("testUser")
 				out.EXPECT().Write("users/test_user.yaml", "name: TestUser, dir: target/dir")
 				out.EXPECT().DestDir().Return("target/dir")
 			},
@@ -151,11 +151,11 @@ func TestGenerator_Generate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ctrl := gomock.NewController(t)
-			tmpl := NewMockTemplateSource(ctrl)
+			tmpl := NewMockMoldSource(ctrl)
 			in := NewMockInputPort(ctrl)
 			out := NewMockOutputPort(ctrl)
 			tt.mockset(tmpl, in, out)
-			g := &Generator{
+			g := &Metal{
 				tmpl: tmpl,
 				in:   in,
 				out:  out,

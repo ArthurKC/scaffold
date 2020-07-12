@@ -6,11 +6,11 @@ import (
 
 type {{firstRuneToUpper .Usecase}}Interactor struct {
 	repo   {{.Name}}.Repository
-	idGen  {{.Name}}.IDGenerator
+	idGen  {{.Name}}.IDMetal
 	output {{firstRuneToUpper .Usecase}}OutputPort
 }
 
-func New{{firstRuneToUpper .Usecase}}Interactor(repo {{.Name}}.Repository, idGen {{.Name}}.IDGenerator, presenter {{firstRuneToUpper .Usecase}}OutputPort) *{{firstRuneToUpper .Usecase}}Interactor {
+func New{{firstRuneToUpper .Usecase}}Interactor(repo {{.Name}}.Repository, idGen {{.Name}}.IDMetal, presenter {{firstRuneToUpper .Usecase}}OutputPort) *{{firstRuneToUpper .Usecase}}Interactor {
 	return &{{firstRuneToUpper .Usecase}}Interactor{
 		repo,
 		idGen,
