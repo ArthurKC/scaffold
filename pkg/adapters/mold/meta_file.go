@@ -28,7 +28,7 @@ func NewMetaFile(dirPath string) *MetaFile {
 }
 
 func (m *MetaFile) filePath() string {
-	return path.Join(m.dirPath, "foundry.yaml")
+	return path.Join(m.dirPath, "mold.yaml")
 }
 
 func (m *MetaFile) Load() error {

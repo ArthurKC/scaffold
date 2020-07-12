@@ -1,4 +1,4 @@
-package cmd
+package metal
 
 import (
 	ametal "github.com/ArthurKC/foundry/pkg/adapters/metal"

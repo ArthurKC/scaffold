@@ -26,7 +26,7 @@ type MoldSource struct {
 }
 
 func NewMoldSource(moldDir string) (*MoldSource, error) {
-	metaPath := path.Join(moldDir, "foundry.yaml")
+	metaPath := path.Join(moldDir, "mold.yaml")
 	f, err := ioutil.ReadFile(metaPath)
 	if err != nil {
 		return nil, err
