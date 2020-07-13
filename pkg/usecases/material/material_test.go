@@ -1,4 +1,4 @@
-package metal
+package material
 
 import (
 	"reflect"
@@ -12,7 +12,7 @@ type outWriteArgs struct {
 	content string
 }
 
-func TestNewMetal(t *testing.T) {
+func TestNewMaterial(t *testing.T) {
 	type args struct {
 		tmpl MoldSource
 		in   InputPort
@@ -21,7 +21,7 @@ func TestNewMetal(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want *Metal
+		want *Material
 	}{
 		{
 			name: "correct case",
@@ -30,7 +30,7 @@ func TestNewMetal(t *testing.T) {
 				in:   &MockInputPort{},
 				out:  &MockOutputPort{},
 			},
-			want: &Metal{
+			want: &Material{
 				tmpl: &MockMoldSource{},
 				in:   &MockInputPort{},
 				out:  &MockOutputPort{},
@@ -40,13 +40,13 @@ func TestNewMetal(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := New(tt.args.tmpl, tt.args.in, tt.args.out); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("NewMetal() = %v, want %v", got, tt.want)
+				t.Errorf("NewMaterial() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func TestMetal_Generate(t *testing.T) {
+func TestMaterial_Generate(t *testing.T) {
 	tests := []struct {
 		name    string
 		mockset func(tmpl *MockMoldSource, in *MockInputPort, out *MockOutputPort)
@@ -54,14 +54,14 @@ func TestMetal_Generate(t *testing.T) {
 		{
 			name: "empty mold source",
 			mockset: func(tmpl *MockMoldSource, in *MockInputPort, out *MockOutputPort) {
-				tmpl.EXPECT().Constituents().Return([]*Constituent{})
+				tmpl.EXPECT().Parameters().Return([]*Constituent{})
 				tmpl.EXPECT().Paths().Return([]string{})
 			},
 		},
 		{
 			name: "no constituent mold",
 			mockset: func(tmpl *MockMoldSource, in *MockInputPort, out *MockOutputPort) {
-				tmpl.EXPECT().Constituents().Return([]*Constituent{})
+				tmpl.EXPECT().Parameters().Return([]*Constituent{})
 				tmpl.EXPECT().Paths().Return([]string{
 					"a/b/c.yaml.gotmpl",
 				})
@@ -72,7 +72,7 @@ func TestMetal_Generate(t *testing.T) {
 		{
 			name: "single constituent content mold",
 			mockset: func(tmpl *MockMoldSource, in *MockInputPort, out *MockOutputPort) {
-				tmpl.EXPECT().Constituents().Return([]*Constituent{
+				tmpl.EXPECT().Parameters().Return([]*Constituent{
 					{Name: "Name", Description: "Description"},
 				})
 				tmpl.EXPECT().Paths().Return([]string{
@@ -86,7 +86,7 @@ func TestMetal_Generate(t *testing.T) {
 		{
 			name: "single constituent content and path mold",
 			mockset: func(tmpl *MockMoldSource, in *MockInputPort, out *MockOutputPort) {
-				tmpl.EXPECT().Constituents().Return([]*Constituent{
+				tmpl.EXPECT().Parameters().Return([]*Constituent{
 					{Name: "Name", Description: "Description"},
 				})
 				tmpl.EXPECT().Paths().Return([]string{
@@ -98,9 +98,9 @@ func TestMetal_Generate(t *testing.T) {
 			},
 		},
 		{
-			name: "multi constituents content and path mold",
+			name: "multi parameters content and path mold",
 			mockset: func(tmpl *MockMoldSource, in *MockInputPort, out *MockOutputPort) {
-				tmpl.EXPECT().Constituents().Return([]*Constituent{
+				tmpl.EXPECT().Parameters().Return([]*Constituent{
 					{Name: "Name", Description: "D1"},
 					{Name: "Score", Description: "D2"},
 				})
@@ -114,9 +114,9 @@ func TestMetal_Generate(t *testing.T) {
 			},
 		},
 		{
-			name: "multi constituents content and multi paths mold",
+			name: "multi parameters content and multi paths mold",
 			mockset: func(tmpl *MockMoldSource, in *MockInputPort, out *MockOutputPort) {
-				tmpl.EXPECT().Constituents().Return([]*Constituent{
+				tmpl.EXPECT().Parameters().Return([]*Constituent{
 					{Name: "Name", Description: "D1"},
 					{Name: "Score", Description: "D2"},
 				})
@@ -135,7 +135,7 @@ func TestMetal_Generate(t *testing.T) {
 		{
 			name: "mold functions",
 			mockset: func(tmpl *MockMoldSource, in *MockInputPort, out *MockOutputPort) {
-				tmpl.EXPECT().Constituents().Return([]*Constituent{
+				tmpl.EXPECT().Parameters().Return([]*Constituent{
 					{Name: "Name", Description: "D1"},
 				})
 				tmpl.EXPECT().Paths().Return([]string{
@@ -155,7 +155,7 @@ func TestMetal_Generate(t *testing.T) {
 			in := NewMockInputPort(ctrl)
 			out := NewMockOutputPort(ctrl)
 			tt.mockset(tmpl, in, out)
-			g := &Metal{
+			g := &Material{
 				tmpl: tmpl,
 				in:   in,
 				out:  out,

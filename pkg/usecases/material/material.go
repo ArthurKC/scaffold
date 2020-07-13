@@ -1,4 +1,4 @@
-package metal
+package material
 
 //go:generate mockgen -source=$GOFILE -destination=./mock_${GOFILE} -package=$GOPACKAGE
 
@@ -28,23 +28,23 @@ type Constituent struct {
 }
 
 type MoldSource interface {
-	Constituents() []*Constituent
+	Parameters() []*Constituent
 	Paths() []string
 	Source(path string) string
 }
 
-type Metal struct {
+type Material struct {
 	tmpl MoldSource
 	in   InputPort
 	out  OutputPort
 }
 
-func New(tmpl MoldSource, in InputPort, out OutputPort) *Metal {
-	return &Metal{tmpl, in, out}
+func New(tmpl MoldSource, in InputPort, out OutputPort) *Material {
+	return &Material{tmpl, in, out}
 }
 
-func (g *Metal) resolveConstituents() map[string]string {
-	paramNames := g.tmpl.Constituents()
+func (g *Material) resolveParameters() map[string]string {
+	paramNames := g.tmpl.Parameters()
 	params := make(map[string]string, len(paramNames))
 	for _, p := range paramNames {
 		params[p.Name] = g.in.Ask(p)
@@ -52,7 +52,7 @@ func (g *Metal) resolveConstituents() map[string]string {
 	return params
 }
 
-func (g *Metal) executeMold(name string, tmpl string, params map[string]string) string {
+func (g *Material) executeMold(name string, tmpl string, params map[string]string) string {
 	funcMap := make(template.FuncMap, 0)
 	funcMap["firstRuneToLower"] = xstrings.FirstRuneToLower
 	funcMap["firstRuneToUpper"] = xstrings.FirstRuneToUpper
@@ -72,7 +72,7 @@ func (g *Metal) executeMold(name string, tmpl string, params map[string]string) 
 	return sb.String()
 }
 
-func (g *Metal) getOutPath(p string, params map[string]string) string {
+func (g *Material) getOutPath(p string, params map[string]string) string {
 	outPath := p
 	if ext := filepath.Ext(p); strings.ToLower(ext) == ".gotmpl" {
 		outPath = strings.TrimSuffix(outPath, ext)
@@ -80,8 +80,8 @@ func (g *Metal) getOutPath(p string, params map[string]string) string {
 	return g.executeMold(p, outPath, params)
 }
 
-func (g *Metal) Generate() {
-	params := g.resolveConstituents()
+func (g *Material) Generate() {
+	params := g.resolveParameters()
 	for _, p := range g.tmpl.Paths() {
 		outPath := g.getOutPath(p, params)
 		content := g.executeMold(

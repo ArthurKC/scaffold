@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ArthurKC/foundry/cmd/metal"
+	"github.com/ArthurKC/foundry/cmd/material"
 	"github.com/ArthurKC/foundry/cmd/mold"
 
 	"github.com/spf13/cobra"
 )
 
 func init() {
-	metal.BindCommand(rootCmd)
+	material.BindCommand(rootCmd)
 	mold.BindCommand(rootCmd)
 }
 

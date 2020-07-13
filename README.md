@@ -1,6 +1,6 @@
 # foundry
 
-Simple and customizable scaffold generator as if pouring molten metal into a mold in the foundry.
+Simple and customizable scaffold generator as if pouring molten material into a mold in the foundry.
 
 ## feature
 
@@ -18,7 +18,7 @@ Simple and customizable scaffold generator as if pouring molten metal into a mol
 ### To create scaffold by interactive mode
 
 ```bash
-> foundry metal pour_into molds/cleanArchitecture/aggregationRoot destDir
+> foundry material pour_into molds/cleanArchitecture/aggregationRoot destDir
 Project: Full name identifing the project in the world. e.g. github.com/ArthurKC/foundry
 Project?: github.com/ArthurKC/spiral
 Name: The aggregation root name. It must be lower camel case.

@@ -13,7 +13,7 @@ type MetaFile struct {
 }
 
 type metaYaml struct {
-	Constituents []*constituent
+	Parameters []*constituent
 }
 
 type constituent struct {
