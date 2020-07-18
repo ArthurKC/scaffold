@@ -1,4 +1,4 @@
-package metal
+package material
 
 import (
 	"github.com/spf13/cobra"
@@ -9,7 +9,7 @@ func BindCommand(parent *cobra.Command) {
 }
 
 var rootCmd = &cobra.Command{
-	Use:   "metal",
-	Short: "Manage metal.",
-	Long:  `Manage metal.`,
+	Use:   "material",
+	Short: "Manage material.",
+	Long:  `Manage material.`,
 }
