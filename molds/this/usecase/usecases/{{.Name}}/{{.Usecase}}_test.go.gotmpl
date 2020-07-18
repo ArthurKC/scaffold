@@ -1,0 +1,39 @@
+package {{.Name}}
+
+import (
+	"testing"
+
+	"{{.Project}}/{{DestDir}}/domains/{{.Name}}"
+	gomock "github.com/golang/mock/gomock"
+)
+
+func Test{{firstRuneToUpper .Usecase}}Interactor_Execute{{firstRuneToUpper .Usecase}}(t *testing.T) {
+	type args struct {
+		req *{{firstRuneToUpper .Usecase}}Request
+	}
+	tests := []struct {
+		name    string
+		mockset func(repo *{{.Name}}.MockRepository, out *Mock{{firstRuneToUpper .Usecase}}OutputPort)
+		args    args
+	}{
+		{
+			name: "empty source",
+			mockset: func(repo *{{.Name}}.MockRepository, out *Mock{{firstRuneToUpper .Usecase}}OutputPort) {
+			},
+			args: args{},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			repo := {{.Name}}.NewMockRepository(ctrl)
+			out := NewMock{{firstRuneToUpper .Usecase}}OutputPort(ctrl)
+			tt.mockset(repo, out)
+			r := &{{firstRuneToUpper .Usecase}}Interactor{
+				repo:    repo,
+				output:  out,
+			}
+			r.Execute{{firstRuneToUpper .Usecase}}(tt.args.req)
+		})
+	}
+}

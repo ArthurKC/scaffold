@@ -1,4 +1,4 @@
-constituents:
+parameters:
   - name: Project
     description: "Full name identifing the project in the world. e.g. github.com/ArthurKC/foundry"
   - name: Name
