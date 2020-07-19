@@ -2,6 +2,7 @@ package mold
 
 import (
 	"os"
+	"strings"
 
 	"github.com/ArthurKC/foundry/pkg/adapters/material"
 	amold "github.com/ArthurKC/foundry/pkg/adapters/mold"
@@ -19,8 +20,8 @@ var pourCmd = &cobra.Command{
 	Short: "pour molten material into a mold.",
 	Long:  `pour molten material into a mold.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		moldDir := args[0]
-		destDir := args[1]
+		moldDir := strings.TrimSuffix(args[0], "/")
+		destDir := strings.TrimSuffix(args[1], "/")
 		pour := umold.NewPourInteractor(
 			amold.NewFileRepository(),
 			material.NewIOMaterialService(os.Stdout, os.Stdin),

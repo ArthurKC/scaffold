@@ -29,5 +29,5 @@ func (i *IOOutputPort) RenderCreateResponse(r *mold.CreateResponse) {
 }
 
 func (i *IOOutputPort) RenderCreateError(e *mold.CreateError) {
-	fmt.Fprintf(i.writer, "completed create! (mold = %s, err = %v)", e.Req.MoldName, e.Err)
+	fmt.Fprintf(i.writer, "failed create. (mold = %s, err = %v)", e.Req.MoldName, e.Err)
 }

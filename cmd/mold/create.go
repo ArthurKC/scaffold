@@ -2,6 +2,7 @@ package mold
 
 import (
 	"os"
+	"strings"
 
 	amold "github.com/ArthurKC/foundry/pkg/adapters/mold"
 	umold "github.com/ArthurKC/foundry/pkg/usecases/mold"
@@ -18,10 +19,10 @@ var initCmd = &cobra.Command{
 	Short: "Create directory as mold.",
 	Long:  `Create directory as mold. Create mold.yaml meta file.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		moldDir := args[0]
+		moldDir := strings.TrimSuffix(args[0], "/")
 		importDir := moldDir
 		if len(args) >= 2 {
-			importDir = args[1]
+			importDir = strings.TrimSuffix(args[1], "/")
 		}
 		u := umold.NewCreateInteractor(
 			amold.NewFileRepository(),
